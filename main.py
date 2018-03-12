@@ -29,6 +29,7 @@ def main():
 			"code": code,
 			"redirect_uri": redirect_uri}
 
+	# TODO: Fix encoding issue in python 2
 	auth = base64.b64encode(client_id + ":" + client_secret)
 	headers = {"Authorization": "Basic " + auth}
 
