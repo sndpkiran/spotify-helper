@@ -8,11 +8,21 @@ import base64
 from creds import *
 
 scopes = "user-read-private user-read-email"
+authorize_url = "https://accounts.spotify.com/authorize?response_type=code"
+token_url = "https://accounts.spotify.com/api/token"
+api_url = "https://api.spotify.com/v1/me"
+playlist_url = "https://api.spotify.com/v1/users/"
+
+def get_playlists(user, headers):
+	user_id = user.json()['id']
+	playlists = requests.get(playlist_url + user_id + "/playlists", headers=headers)
+
+	playlist_id = playlists.json()['items'][1]['id']
+
+	tracks  = requests.get(playlist_url + user_id + "/playlists/" + playlist_id + "/tracks",  headers=headers)
+	print tracks.content
 
 def main():
-	authorize_url = "https://accounts.spotify.com/authorize?response_type=code"
-	token_url = "https://accounts.spotify.com/api/token"
-	api_url = "https://api.spotify.com/v1/me"
 
 	params = { "client_id": client_id,
 	 	   "scope": scopes,
@@ -45,7 +55,8 @@ def main():
 	headers = {"Authorization": "Bearer " + access_token}
 	user = requests.get(api_url, headers=headers)
 
-	print user.content
+	# print user.content
+	get_playlists(user, headers)
 
 if __name__ == "__main__":
 	main()
