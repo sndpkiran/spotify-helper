@@ -5,9 +5,10 @@ import urllib
 import urlparse
 import webbrowser
 import base64
+import json
 from creds import *
 
-scopes = "user-read-private user-read-email"
+scopes = "user-read-private user-read-email playlist-modify-public"
 authorize_url = "https://accounts.spotify.com/authorize?response_type=code"
 token_url = "https://accounts.spotify.com/api/token"
 api_url = "https://api.spotify.com/v1/me"
@@ -19,8 +20,21 @@ def get_playlists(user, headers):
 
 	playlist_id = playlists.json()['items'][1]['id']
 
-	tracks  = requests.get(playlist_url + user_id + "/playlists/" + playlist_id + "/tracks",  headers=headers)
-	print tracks.content
+	tracks  = json.loads(requests.get(playlist_url + user_id + "/playlists/" + playlist_id + "/tracks",  headers=headers).content)
+	count = len(tracks['items'])
+
+	headers['Content-type'] = "application/json"
+	payload = '{"range_start": 0, "insert_before": 4}'
+	response = requests.put(playlist_url + user_id + "/playlists/" + playlist_id + "/tracks", data=payload, headers=headers)
+
+	print response.content
+
+
+	for i in range(6):
+		name = tracks['items'][i]['track']['name']
+		album = tracks['items'][i]['track']['album']['name']
+		print name + " - " + album
+
 
 def main():
 
