@@ -14,21 +14,28 @@ token_url = "https://accounts.spotify.com/api/token"
 api_url = "https://api.spotify.com/v1/me"
 playlist_url = "https://api.spotify.com/v1/users/"
 
-def get_playlists(user, headers):
-	user_id = user.json()['id']
-	playlists = requests.get(playlist_url + user_id + "/playlists", headers=headers)
 
-	playlist_id = playlists.json()['items'][1]['id']
-
-	tracks  = json.loads(requests.get(playlist_url + user_id + "/playlists/" + playlist_id + "/tracks",  headers=headers).content)
-	count = len(tracks['items'])
-
+def randomize_songs(playlist_id, user_id, headers, start=0, end=0):
 	headers['Content-type'] = "application/json"
-	payload = '{"range_start": 0, "insert_before": 4}'
+	payload = '{"range_start": ' + str(start) + ', "insert_before": ' + str(end) + '}'
 	response = requests.put(playlist_url + user_id + "/playlists/" + playlist_id + "/tracks", data=payload, headers=headers)
 
 	print response.content
 
+def get_playlists(user, headers):
+	user_id = user.json()['id']
+	playlists = requests.get(playlist_url + user_id + "/playlists", headers=headers)
+
+	print "playlists: "
+	for i in range(6):
+		print playlists.json()['items'][i]['name']
+
+	playlist_id = playlists.json()['items'][0]['id']
+
+	tracks  = json.loads(requests.get(playlist_url + user_id + "/playlists/" + playlist_id + "/tracks",  headers=headers).content)
+	count = len(tracks['items'])
+
+	randomize_songs(playlist_id, user_id, headers, 0, 4)
 
 	for i in range(6):
 		name = tracks['items'][i]['track']['name']
@@ -68,6 +75,8 @@ def main():
 
 	headers = {"Authorization": "Bearer " + access_token}
 	user = requests.get(api_url, headers=headers)
+
+	# TODO: Look into refresh tokens to extend the validity of the access token
 
 	# print user.content
 	get_playlists(user, headers)
